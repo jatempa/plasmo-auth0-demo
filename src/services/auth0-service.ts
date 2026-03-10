@@ -1,8 +1,8 @@
-import type { Auth0UserInfo, AuthSession } from "~src/models/auth"
+import type { Auth0UserInfo, AuthSession } from "@/models/auth"
 import {
   clearAuthSession,
   setAuthSession
-} from "~src/services/auth-session-storage"
+} from "@/services/auth-session-storage"
 
 const AUTH0_DOMAIN = process.env.PLASMO_PUBLIC_AUTH0_DOMAIN
 const AUTH0_CLIENT_ID = process.env.PLASMO_PUBLIC_AUTH0_CLIENT_ID

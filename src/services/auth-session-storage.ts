@@ -1,5 +1,5 @@
 import { Storage } from "@plasmohq/storage"
-import type { AuthSession } from "~src/models/auth"
+import type { AuthSession } from "@/models/auth"
 
 const AUTH_STORAGE_KEY = "auth0_session"
 const authStorage = new Storage({ area: "local" })

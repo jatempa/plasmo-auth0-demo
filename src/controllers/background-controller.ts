@@ -2,9 +2,9 @@ import {
   AUTH0_GET_SESSION,
   AUTH0_LOGIN,
   AUTH0_LOGOUT
-} from "~src/models/auth"
-import { getAuthSession } from "~src/services/auth-session-storage"
-import { loginWithAuth0, logoutFromAuth0 } from "~src/services/auth0-service"
+} from "@/models/auth"
+import { getAuthSession } from "@/services/auth-session-storage"
+import { loginWithAuth0, logoutFromAuth0 } from "@/services/auth0-service"
 
 const canConfigureSidePanelBehavior = () =>
   Boolean(chrome.sidePanel?.setPanelBehavior)

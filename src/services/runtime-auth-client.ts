@@ -6,7 +6,7 @@ import {
   type AuthLoginResponse,
   type AuthLogoutResponse,
   type AuthMessage
-} from "~src/models/auth"
+} from "@/models/auth"
 
 const sendMessage = <TResponse>(message: AuthMessage): Promise<TResponse> =>
   new Promise((resolve, reject) => {

@@ -1,3 +1,3 @@
-import { registerBackgroundController } from "~src/controllers/background-controller"
+import { registerBackgroundController } from "@/controllers/background-controller"
 
 registerBackgroundController()

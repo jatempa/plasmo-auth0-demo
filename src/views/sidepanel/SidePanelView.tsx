@@ -4,7 +4,7 @@ import {
   requestAuthLogin,
   requestAuthLogout,
   requestAuthSession
-} from "~src/services/runtime-auth-client"
+} from "@/services/runtime-auth-client"
 
 import LoadingCard from "./components/LoadingCard"
 import SignInCard from "./components/SignInCard"
