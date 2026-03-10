@@ -4,14 +4,8 @@ import WelcomeCard from "./components/WelcomeCard"
 import { useAuth } from "./hooks/useAuth"
 
 function SidePanelView() {
-  const {
-    isLoading,
-    error,
-    isAuthenticated,
-    user,
-    onLogin,
-    onLogout
-  } = useAuth()
+  const { isLoading, error, isAuthenticated, user, onLogin, onLogout } =
+    useAuth()
 
   if (isLoading) {
     return <LoadingCard />
@@ -20,15 +14,7 @@ function SidePanelView() {
     return <SignInCard error={error} onLogin={onLogin} />
   }
 
-  return (
-    <WelcomeCard
-      displayName={user.displayName}
-      email={user.email}
-      error={error}
-      onLogout={onLogout}
-      picture={user.picture}
-    />
-  )
+  return <WelcomeCard user={user} error={error} onLogout={onLogout} />
 }
 
 export default SidePanelView

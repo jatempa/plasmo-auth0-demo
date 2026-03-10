@@ -1,24 +1,22 @@
+import type { User } from "../hooks/useAuth"
 import { sidepanelClasses as c } from "../sidepanelClasses"
 
 type WelcomeCardProps = {
-  displayName: string
-  email: string
-  picture: string
+  user: User
   error: string
   onLogout: () => void
 }
 
-function WelcomeCard({
-  displayName,
-  email,
-  picture,
-  error,
-  onLogout
-}: WelcomeCardProps) {
+function WelcomeCard({ user, error, onLogout }: WelcomeCardProps) {
+  const { displayName, email, picture } = user
   return (
     <section className={`${c.card} ${c.authenticatedCard}`}>
       {picture ? (
-        <img alt={`${displayName} profile`} className={c.avatar} src={picture} />
+        <img
+          alt={`${displayName} profile`}
+          className={c.avatar}
+          src={picture}
+        />
       ) : null}
       <h2 className={c.title}>Welcome, {displayName}!</h2>
       <p className={c.body}>You are signed in with Auth0.</p>

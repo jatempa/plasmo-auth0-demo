@@ -5,7 +5,7 @@ import {
 } from "@/services/runtime-auth-client"
 import { useEffect, useState } from "react"
 
-type User = {
+export type User = {
   displayName: string
   email: string
   picture: string
