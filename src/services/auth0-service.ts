@@ -7,6 +7,7 @@ import {
 const AUTH0_DOMAIN = process.env.PLASMO_PUBLIC_AUTH0_DOMAIN
 const AUTH0_CLIENT_ID = process.env.PLASMO_PUBLIC_AUTH0_CLIENT_ID
 const AUTH0_AUDIENCE = process.env.PLASMO_PUBLIC_AUTH0_AUDIENCE
+const AUTH0_SCOPE = process.env.PLASMO_PUBLIC_AUTH0_SCOPE || "openid profile email"
 
 const assertAuthConfig = () => {
   if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
@@ -33,6 +34,17 @@ const randomString = (length = 64) => {
 const sha256 = async (value: string) => {
   const data = new TextEncoder().encode(value)
   return crypto.subtle.digest("SHA-256", data)
+}
+
+// RFC7636-compliant verifier using unreserved URI characters via base64url.
+const generateCodeVerifier = (size = 64) => {
+  const randomBytes = new Uint8Array(size)
+  crypto.getRandomValues(randomBytes)
+  return toBase64Url(randomBytes.buffer)
+}
+
+const createCodeChallenge = async (codeVerifier: string) => {
+  return toBase64Url(await sha256(codeVerifier))
 }
 
 const parseJwtPayload = (token: string) => {
@@ -82,15 +94,15 @@ export const loginWithAuth0 = async (): Promise<AuthSession> => {
 
   const redirectUri = chrome.identity.getRedirectURL("auth0")
   const state = randomString(32)
-  const codeVerifier = randomString(64)
-  const challenge = toBase64Url(await sha256(codeVerifier))
-  const scope = "openid profile email"
+  const codeVerifier = generateCodeVerifier(64)
+  const challenge = await createCodeChallenge(codeVerifier)
 
   const authorizeUrl = new URL(`https://${AUTH0_DOMAIN}/authorize`)
   authorizeUrl.searchParams.set("response_type", "code")
+  authorizeUrl.searchParams.set("response_mode", "query")
   authorizeUrl.searchParams.set("client_id", AUTH0_CLIENT_ID)
   authorizeUrl.searchParams.set("redirect_uri", redirectUri)
-  authorizeUrl.searchParams.set("scope", scope)
+  authorizeUrl.searchParams.set("scope", AUTH0_SCOPE)
   authorizeUrl.searchParams.set("state", state)
   authorizeUrl.searchParams.set("code_challenge", challenge)
   authorizeUrl.searchParams.set("code_challenge_method", "S256")
