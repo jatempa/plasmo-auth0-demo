@@ -1,4 +1,4 @@
-import { Storage } from "@plasmohq/storage"
+import { Storage, type StorageCallbackMap } from "@plasmohq/storage"
 import type { AuthSession } from "@/models/auth"
 
 const AUTH_STORAGE_KEY = "auth0_session"
@@ -15,4 +15,18 @@ export const getAuthSession = async (): Promise<AuthSession> => {
 
 export const clearAuthSession = async () => {
   await authStorage.remove(AUTH_STORAGE_KEY)
+}
+
+export const watchAuthSession = (onChange: () => void) => {
+  const callbackMap: StorageCallbackMap = {
+    [AUTH_STORAGE_KEY]: () => {
+      onChange()
+    }
+  }
+
+  authStorage.watch(callbackMap)
+
+  return () => {
+    authStorage.unwatch(callbackMap)
+  }
 }

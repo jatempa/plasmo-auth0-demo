@@ -3,6 +3,10 @@ import {
   requestAuthLogout,
   requestAuthSession
 } from "@/services/runtime-auth-client"
+import {
+  getAuthSession,
+  watchAuthSession
+} from "@/services/auth-session-storage"
 import { useEffect, useState } from "react"
 
 export type User = {
@@ -23,10 +27,48 @@ export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User>(defaultUser)
 
+  const applySession = (session?: {
+    isAuthenticated?: boolean
+    user?: { name?: string; email?: string; picture?: string }
+  }) => {
+    if (session?.isAuthenticated) {
+      setIsAuthenticated(true)
+      setUser({
+        displayName: session.user?.name || "User",
+        email: session.user?.email || "",
+        picture: session.user?.picture || ""
+      })
+      return
+    }
+
+    setIsAuthenticated(false)
+    setUser(defaultUser)
+  }
+
   useEffect(() => {
+    let isMounted = true
+
+    const syncFromStorage = async () => {
+      const session = await getAuthSession()
+      if (!isMounted) {
+        return
+      }
+
+      applySession(session)
+      setIsLoading(false)
+    }
+
+    const unwatch = watchAuthSession(() => {
+      void syncFromStorage()
+    })
+
     ;(async () => {
       try {
         const response = await requestAuthSession()
+        if (!isMounted) {
+          return
+        }
+
         if (!response.ok) {
           setError(
             "error" in response ? response.error : "Could not load session."
@@ -35,23 +77,26 @@ export const useAuth = () => {
           return
         }
 
-        const session = response.session
-        if (session?.isAuthenticated) {
-          setIsAuthenticated(true)
-          setUser({
-            displayName: session?.user?.name || "User",
-            email: session?.user?.email || "",
-            picture: session?.user?.picture || ""
-          })
-        }
+        applySession(response.session)
       } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
         setError(
           error instanceof Error ? error.message : "Could not load session."
         )
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     })()
+
+    return () => {
+      isMounted = false
+      unwatch()
+    }
   }, [])
 
   const onLogin = () => {
@@ -66,13 +111,7 @@ export const useAuth = () => {
           return
         }
 
-        const session = response.session
-        setIsAuthenticated(Boolean(session?.isAuthenticated))
-        setUser({
-          displayName: session?.user?.name || "User",
-          email: session?.user?.email || "",
-          picture: session?.user?.picture || ""
-        })
+        applySession(response.session)
       } catch (error) {
         setError(error instanceof Error ? error.message : "Auth0 login failed.")
       } finally {
@@ -95,8 +134,7 @@ export const useAuth = () => {
           return
         }
 
-        setIsAuthenticated(false)
-        setUser(defaultUser)
+        applySession()
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Auth0 logout failed."
