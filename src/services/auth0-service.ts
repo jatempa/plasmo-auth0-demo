@@ -1,13 +1,9 @@
+import type { Auth0UserInfo, AuthSession } from "~src/models/auth"
 import {
-  AUTH0_GET_SESSION,
-  AUTH0_LOGIN,
-  AUTH0_LOGOUT,
-  type AuthSession
-} from "~auth"
-import { Storage } from "@plasmohq/storage"
+  clearAuthSession,
+  setAuthSession
+} from "~src/services/auth-session-storage"
 
-const AUTH_STORAGE_KEY = "auth0_session"
-const authStorage = new Storage({ area: "local" })
 const AUTH0_DOMAIN = process.env.PLASMO_PUBLIC_AUTH0_DOMAIN
 const AUTH0_CLIENT_ID = process.env.PLASMO_PUBLIC_AUTH0_CLIENT_ID
 const AUTH0_AUDIENCE = process.env.PLASMO_PUBLIC_AUTH0_AUDIENCE
@@ -20,9 +16,6 @@ const assertAuthConfig = () => {
   }
 }
 
-const canConfigureSidePanelBehavior = () =>
-  Boolean(chrome.sidePanel?.setPanelBehavior)
-
 const toBase64Url = (buffer: ArrayBuffer) =>
   btoa(String.fromCharCode(...new Uint8Array(buffer)))
     .replace(/\+/g, "-")
@@ -32,7 +25,9 @@ const toBase64Url = (buffer: ArrayBuffer) =>
 const randomString = (length = 64) => {
   const randomBytes = new Uint8Array(length)
   crypto.getRandomValues(randomBytes)
-  return Array.from(randomBytes, (byte) => ("0" + (byte % 36).toString(36)).slice(-1)).join("")
+  return Array.from(randomBytes, (byte) =>
+    ("0" + (byte % 36).toString(36)).slice(-1)
+  ).join("")
 }
 
 const sha256 = async (value: string) => {
@@ -49,26 +44,6 @@ const parseJwtPayload = (token: string) => {
   const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=")
   return JSON.parse(atob(padded)) as Record<string, string>
-}
-
-type Auth0UserInfo = {
-  sub?: string
-  name?: string
-  email?: string
-  picture?: string
-}
-
-const setAuthSession = async (session: AuthSession) => {
-  await authStorage.set(AUTH_STORAGE_KEY, session)
-}
-
-const getAuthSession = async (): Promise<AuthSession> => {
-  const session = await authStorage.get<AuthSession>(AUTH_STORAGE_KEY)
-  return session ?? { isAuthenticated: false }
-}
-
-const clearAuthSession = async () => {
-  await authStorage.remove(AUTH_STORAGE_KEY)
 }
 
 const launchWebAuthFlow = async (url: string, interactive: boolean) => {
@@ -102,7 +77,7 @@ const fetchAuth0UserInfo = async (accessToken: string): Promise<Auth0UserInfo> =
   return (await userInfoResponse.json()) as Auth0UserInfo
 }
 
-const loginWithAuth0 = async (): Promise<AuthSession> => {
+export const loginWithAuth0 = async (): Promise<AuthSession> => {
   assertAuthConfig()
 
   const redirectUri = chrome.identity.getRedirectURL("auth0")
@@ -188,7 +163,7 @@ const loginWithAuth0 = async (): Promise<AuthSession> => {
   return session
 }
 
-const logoutFromAuth0 = async () => {
+export const logoutFromAuth0 = async () => {
   assertAuthConfig()
 
   const redirectUri = chrome.identity.getRedirectURL("auth0-logout")
@@ -199,44 +174,3 @@ const logoutFromAuth0 = async () => {
   await launchWebAuthFlow(logoutUrl.toString(), true)
   await clearAuthSession()
 }
-
-chrome.runtime.onInstalled.addListener(() => {
-  if (!canConfigureSidePanelBehavior()) {
-    return
-  }
-
-  chrome.sidePanel
-    .setPanelBehavior({ openPanelOnActionClick: true })
-    .catch((error) => {
-      console.error("Failed to configure side panel behavior:", error)
-    })
-})
-
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  ;(async () => {
-    try {
-      if (message?.type === AUTH0_GET_SESSION) {
-        const session = await getAuthSession()
-        sendResponse({ ok: true, session })
-        return
-      }
-
-      if (message?.type === AUTH0_LOGIN) {
-        const session = await loginWithAuth0()
-        sendResponse({ ok: true, session })
-        return
-      }
-
-      if (message?.type === AUTH0_LOGOUT) {
-        await logoutFromAuth0()
-        sendResponse({ ok: true })
-      }
-    } catch (error) {
-      const messageText =
-        error instanceof Error ? error.message : "Unknown background error."
-      sendResponse({ ok: false, error: messageText })
-    }
-  })()
-
-  return true
-})

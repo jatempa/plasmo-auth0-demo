@@ -3,7 +3,7 @@ import {
   requestAuthLogin,
   requestAuthLogout,
   requestAuthSession
-} from "~auth"
+} from "~src/services/runtime-auth-client"
 
 const containerStyle: CSSProperties = {
   padding: 20,
@@ -30,7 +30,7 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer"
 }
 
-function SidePanel() {
+function SidePanelView() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -197,4 +197,4 @@ function SidePanel() {
   )
 }
 
-export default SidePanel
+export default SidePanelView

@@ -14,6 +14,13 @@ export type AuthSession = {
   accessToken?: string
 }
 
+export type Auth0UserInfo = {
+  sub?: string
+  name?: string
+  email?: string
+  picture?: string
+}
+
 export type AuthGetSessionMessage = { type: typeof AUTH0_GET_SESSION }
 export type AuthLoginMessage = { type: typeof AUTH0_LOGIN }
 export type AuthLogoutMessage = { type: typeof AUTH0_LOGOUT }
@@ -35,23 +42,3 @@ export type AuthLoginResponse =
   | AuthErrorResponse
 
 export type AuthLogoutResponse = AuthOkResponse | AuthErrorResponse
-
-const sendMessage = <TResponse>(message: AuthMessage): Promise<TResponse> =>
-  new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(message, (response: TResponse) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message))
-        return
-      }
-      resolve(response)
-    })
-  })
-
-export const requestAuthSession = () =>
-  sendMessage<AuthGetSessionResponse>({ type: AUTH0_GET_SESSION })
-
-export const requestAuthLogin = () =>
-  sendMessage<AuthLoginResponse>({ type: AUTH0_LOGIN })
-
-export const requestAuthLogout = () =>
-  sendMessage<AuthLogoutResponse>({ type: AUTH0_LOGOUT })
