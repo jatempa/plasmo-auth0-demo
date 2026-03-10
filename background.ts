@@ -6,8 +6,6 @@ import {
 } from "~auth"
 import { Storage } from "@plasmohq/storage"
 
-const SIDE_PANEL_PATH = "sidepanel.html"
-const openTabs = new Set<number>()
 const AUTH_STORAGE_KEY = "auth0_session"
 const authStorage = new Storage({ area: "local" })
 const AUTH0_DOMAIN = process.env.PLASMO_PUBLIC_AUTH0_DOMAIN
@@ -22,23 +20,8 @@ const assertAuthConfig = () => {
   }
 }
 
-const canUseSidePanel = () =>
-  Boolean(chrome.sidePanel?.setPanelBehavior && chrome.sidePanel?.setOptions)
-
-const openPanelForTab = async (tabId: number) => {
-  await chrome.sidePanel.setOptions({
-    tabId,
-    path: SIDE_PANEL_PATH,
-    enabled: true
-  })
-  await chrome.sidePanel.open({ tabId })
-  openTabs.add(tabId)
-}
-
-const closePanelForTab = async (tabId: number) => {
-  await chrome.sidePanel.setOptions({ tabId, enabled: false })
-  openTabs.delete(tabId)
-}
+const canConfigureSidePanelBehavior = () =>
+  Boolean(chrome.sidePanel?.setPanelBehavior)
 
 const toBase64Url = (buffer: ArrayBuffer) =>
   btoa(String.fromCharCode(...new Uint8Array(buffer)))
@@ -218,7 +201,7 @@ const logoutFromAuth0 = async () => {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  if (!canUseSidePanel()) {
+  if (!canConfigureSidePanelBehavior()) {
     return
   }
 
@@ -229,32 +212,9 @@ chrome.runtime.onInstalled.addListener(() => {
     })
 })
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   ;(async () => {
     try {
-      if (message?.type === "TOGGLE_SIDE_PANEL") {
-        if (!canUseSidePanel()) {
-          sendResponse({ ok: false, error: "sidePanel API is unavailable." })
-          return
-        }
-
-        const tabId = sender.tab?.id
-        if (!tabId) {
-          sendResponse({ ok: false, error: "Missing sender tab id." })
-          return
-        }
-
-        if (openTabs.has(tabId)) {
-          await closePanelForTab(tabId)
-          sendResponse({ ok: true, isOpen: false })
-          return
-        }
-
-        await openPanelForTab(tabId)
-        sendResponse({ ok: true, isOpen: true })
-        return
-      }
-
       if (message?.type === AUTH0_GET_SESSION) {
         const session = await getAuthSession()
         sendResponse({ ok: true, session })
