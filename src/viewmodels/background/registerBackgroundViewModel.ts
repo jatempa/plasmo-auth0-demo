@@ -9,7 +9,7 @@ import { loginWithAuth0, logoutFromAuth0 } from "@/services/auth0-service"
 const canConfigureSidePanelBehavior = () =>
   Boolean(chrome.sidePanel?.setPanelBehavior)
 
-export const registerBackgroundController = () => {
+export const registerBackgroundViewModel = () => {
   chrome.runtime.onInstalled.addListener(() => {
     if (!canConfigureSidePanelBehavior()) {
       return

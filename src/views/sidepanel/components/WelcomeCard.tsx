@@ -1,4 +1,4 @@
-import type { User } from "../hooks/useAuth"
+import type { User } from "@/viewmodels/sidepanel/types"
 import { sidepanelClasses as c } from "../sidepanelClasses"
 
 type WelcomeCardProps = {

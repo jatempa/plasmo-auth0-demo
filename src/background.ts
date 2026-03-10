@@ -1,3 +1,3 @@
-import { registerBackgroundController } from "@/controllers/background-controller"
+import { registerBackgroundViewModel } from "@/viewmodels/background/registerBackgroundViewModel"
 
-registerBackgroundController()
+registerBackgroundViewModel()

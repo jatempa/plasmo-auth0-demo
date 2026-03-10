@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 import {
   requestAuthLogin,
   requestAuthLogout,
@@ -7,13 +9,7 @@ import {
   getAuthSession,
   watchAuthSession
 } from "@/services/auth-session-storage"
-import { useEffect, useState } from "react"
-
-export type User = {
-  displayName: string
-  email: string
-  picture: string
-}
+import type { SidePanelViewModel, User } from "@/viewmodels/sidepanel/types"
 
 const defaultUser: User = {
   displayName: "User",
@@ -21,7 +17,7 @@ const defaultUser: User = {
   picture: ""
 }
 
-export const useAuth = () => {
+export const useSidePanelViewModel = (): SidePanelViewModel => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -70,9 +66,7 @@ export const useAuth = () => {
         }
 
         if (!response.ok) {
-          setError(
-            "error" in response ? response.error : "Could not load session."
-          )
+          setError("error" in response ? response.error : "Could not load session.")
           setIsLoading(false)
           return
         }
@@ -83,9 +77,7 @@ export const useAuth = () => {
           return
         }
 
-        setError(
-          error instanceof Error ? error.message : "Could not load session."
-        )
+        setError(error instanceof Error ? error.message : "Could not load session.")
       } finally {
         if (isMounted) {
           setIsLoading(false)
@@ -102,6 +94,7 @@ export const useAuth = () => {
   const onLogin = () => {
     setError("")
     setIsLoading(true)
+
     ;(async () => {
       try {
         const response = await requestAuthLogin()
@@ -123,22 +116,19 @@ export const useAuth = () => {
   const onLogout = () => {
     setError("")
     setIsLoading(true)
+
     ;(async () => {
       try {
         const response = await requestAuthLogout()
         if (!response.ok) {
-          setError(
-            "error" in response ? response.error : "Auth0 logout failed."
-          )
+          setError("error" in response ? response.error : "Auth0 logout failed.")
           setIsLoading(false)
           return
         }
 
         applySession()
       } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Auth0 logout failed."
-        )
+        setError(error instanceof Error ? error.message : "Auth0 logout failed.")
       } finally {
         setIsLoading(false)
       }

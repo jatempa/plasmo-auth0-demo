@@ -1,11 +1,11 @@
 import LoadingCard from "./components/LoadingCard"
 import SignInCard from "./components/SignInCard"
 import WelcomeCard from "./components/WelcomeCard"
-import { useAuth } from "./hooks/useAuth"
+import { useSidePanelViewModel } from "@/viewmodels/sidepanel/useSidePanelViewModel"
 
 function SidePanelView() {
   const { isLoading, error, isAuthenticated, user, onLogin, onLogout } =
-    useAuth()
+    useSidePanelViewModel()
 
   if (isLoading) {
     return <LoadingCard />
