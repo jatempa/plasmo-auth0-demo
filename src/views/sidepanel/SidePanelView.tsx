@@ -1,34 +1,10 @@
-import { type CSSProperties, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   requestAuthLogin,
   requestAuthLogout,
   requestAuthSession
 } from "~src/services/runtime-auth-client"
-
-const containerStyle: CSSProperties = {
-  padding: 20,
-  fontFamily: "Arial, sans-serif",
-  color: "#111827"
-}
-
-const cardStyle: CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: 16,
-  background: "#ffffff"
-}
-
-const buttonStyle: CSSProperties = {
-  width: "100%",
-  padding: "10px 12px",
-  border: "none",
-  borderRadius: 8,
-  background: "#2563eb",
-  color: "#ffffff",
-  fontWeight: 600,
-  fontSize: 14,
-  cursor: "pointer"
-}
+import { sidepanelClasses as c } from "./sidepanelClasses"
 
 function SidePanelView() {
   const [isLoading, setIsLoading] = useState(true)
@@ -117,78 +93,40 @@ function SidePanelView() {
   }
 
   return (
-    <main style={containerStyle}>
+    <main className={c.container}>
       {isLoading ? (
-        <section style={cardStyle}>
-          <p style={{ margin: 0, color: "#6b7280" }}>Loading...</p>
+        <section className={c.card}>
+          <p className={c.loadingText}>Loading...</p>
         </section>
       ) : null}
 
       {!isAuthenticated && !isLoading ? (
-        <section style={cardStyle}>
-          <h2 style={{ marginTop: 0, marginBottom: 8 }}>Sign in with Auth0</h2>
-          <p style={{ marginTop: 0, marginBottom: 16, color: "#6b7280" }}>
-            Continue with your Auth0 account.
-          </p>
+        <section className={c.card}>
+          <h2 className={c.title}>Sign in with Auth0</h2>
+          <p className={c.subtitle}>Continue with your Auth0 account.</p>
           {error ? (
-            <p style={{ marginTop: 0, marginBottom: 12, color: "#dc2626" }}>
-              {error}
-            </p>
+            <p className={c.error}>{error}</p>
           ) : null}
-          <button onClick={onLogin} style={buttonStyle} type="button">
+          <button className={c.buttonPrimary} onClick={onLogin} type="button">
             Sign In
           </button>
         </section>
       ) : null}
 
       {isAuthenticated && !isLoading ? (
-        <section
-          style={{
-            ...cardStyle,
-            textAlign: "center"
-          }}>
+        <section className={`${c.card} ${c.authenticatedCard}`}>
           {picture ? (
-            <img
-              alt={`${displayName} profile`}
-              src={picture}
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: "50%",
-                objectFit: "cover",
-                display: "block",
-                margin: "0 auto 12px",
-                border: "1px solid #e5e7eb"
-              }}
-            />
+            <img alt={`${displayName} profile`} className={c.avatar} src={picture} />
           ) : null}
-          <h2 style={{ marginTop: 0, marginBottom: 8 }}>Welcome, {displayName}!</h2>
-          <p style={{ marginTop: 0, marginBottom: 16, color: "#374151" }}>
+          <h2 className={c.title}>Welcome, {displayName}!</h2>
+          <p className={c.body}>
             You are signed in with Auth0.
           </p>
           {email ? (
-            <p style={{ marginTop: 0, marginBottom: 16, color: "#6b7280" }}>
-              {email}
-            </p>
+            <p className={c.email}>{email}</p>
           ) : null}
-          {error ? (
-            <p style={{ marginTop: 0, marginBottom: 12, color: "#dc2626" }}>
-              {error}
-            </p>
-          ) : null}
-          <button
-            onClick={onLogout}
-            style={{
-              ...buttonStyle,
-              width: "auto",
-              minWidth: 120,
-              background: "#ffffff",
-              color: "#111827",
-              border: "1px solid #d1d5db",
-              display: "block",
-              margin: "0 auto"
-            }}
-            type="button">
+          {error ? <p className={c.error}>{error}</p> : null}
+          <button className={c.buttonLogout} onClick={onLogout} type="button">
             Log Out
           </button>
         </section>
