@@ -10,6 +10,7 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@plasmohq/storage": "^1.15.0",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -24,6 +25,12 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzNGvW0aSjgA7FMhgAeTjqoLcAoyG01sMdPqXBhyOG+kawQ9bArOeA022Gz0gmEh8EVTj/fio0bxnzGw9cOnEcitA2oKqaEmmTVd0NuOKGLpipKiAVNmZGOkvqU3FXikEcLCIvb1OQbBJzepU4b/h77dt/cetU3XCgZsnKnSg8r3LubM9X/xGIOgwugclXf+u8mw7Trc4zs2yR+sQY3tv8HqPGhqrZ4c3ucHT2qqZ8WAg5LeSSdFvQJ6tLNYwXZVCw+kscRUYTA2aMBtMJk1gmtkbCNfvJLZhOv1qcxz9RvY248YPFkdLMYdYUnuaVlJ6gWxk4v/hCSGRP0483ChdkwIDAQAB",
+    "permissions": [
+      "sidePanel",
+      "identity",
+      "storage"
+    ],
     "host_permissions": [
       "https://*/*"
     ]
